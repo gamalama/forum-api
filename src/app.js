@@ -7,3 +7,8 @@ const container = require('./Infrastructures/container');
   await server.start();
   console.log(`server start at ${server.info.uri}`);
 })();
+
+process.on('unhandledRejection', (err) => {
+  console.log(err);
+  process.exit(1);
+});

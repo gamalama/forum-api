@@ -1,6 +1,11 @@
+const pool = require('../../database/postgres/pool');
 const createServer = require('../createServer');
 
 describe('HTTP server', () => {
+  afterAll(async () => {
+    await pool.end();
+  });
+
   it('should response 404 when request unregistered route', async () => {
     // Arrange
     const server = await createServer({});
