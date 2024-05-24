@@ -18,52 +18,9 @@ describe('HTTP server', () => {
     await AuthenticationsTableTestHelper.cleanTable();
   });
 
-  describe('when POST thread', () => {
-    it('should response 201 and persisted thread', async () => {
-      // Add User
-      const server = await createServer(container);
-      await server.inject({
-        method: 'POST',
-        url: '/users',
-        payload: {
-          username: 'dicoding',
-          password: 'secret',
-          fullname: 'Dicoding Indonesia',
-        },
-      });
-      const loginPayload = {
-        username: 'dicoding',
-        password: 'secret',
-      };
-      const loginResponse = await server.inject({
-        method: 'POST',
-        url: '/authentications',
-        payload: loginPayload,
-      });
-      const { data: { accessToken } } = JSON.parse(loginResponse.payload);
-      // Arrange
-      const requestPayload = {
-        title: 'New Thread',
-        body: 'New thread body.',
-      };
-
-      // Action
-      const response = await server.inject({
-        method: 'POST',
-        url: '/threads',
-        payload: requestPayload,
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const responseJson = JSON.parse(response.payload);
-      expect(response.statusCode).toEqual(201);
-      expect(responseJson.status).toEqual('success');
-      expect(responseJson.data.addedThread).toBeDefined();
-    });
-  });
-
-  describe('when GET thread by ID', () => {
-    it('should response 200 return commented thread', async () => {
-      // Add User
+  describe('when POST comemnt', () => {
+    it('should response 201 and persistent comment', async () => {
+      // Add User for adding thread
       const server = await createServer(container);
       await server.inject({
         method: 'POST',
@@ -87,10 +44,9 @@ describe('HTTP server', () => {
 
       // Add thread
       const addThreadPayload = {
-        title: 'New Thread',
-        body: 'New thread body.',
+        title: 'New Thread 123',
+        body: 'New Thread body.',
       };
-
       const addThreadResponse = await server.inject({
         method: 'POST',
         url: '/threads',
@@ -98,19 +54,26 @@ describe('HTTP server', () => {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const threadId = JSON.parse(addThreadResponse.payload).data.addedThread.id;
+      console.log(threadId);
+
+      // Arrange
+      const requestPayload = {
+        content: 'New Comment 456',
+      };
 
       // Action
       const response = await server.inject({
-        method: 'GET',
-        url: `/threads/${threadId}`,
+        method: 'POST',
+        url: `/threads/${threadId}/comments`,
+        payload: requestPayload,
+        headers: { Authorization: `Bearer ${accessToken}` },
       });
+
       const responseJson = JSON.parse(response.payload);
-      console.log(responseJson);
-      expect(response.statusCode).toEqual(200);
+      console.log(response.payload);
+      expect(response.statusCode).toEqual(201);
       expect(responseJson.status).toEqual('success');
-      expect(responseJson.data.thread).toBeDefined();
-      expect(responseJson.data.thread.id).toBeDefined();
-      expect(responseJson.data.thread.comments).toBeDefined();
+      expect(responseJson.data.addedComment).toBeDefined();
     });
   });
 });
