@@ -58,28 +58,22 @@ describe('ReplyRepositoryPostgres', () => {
   });
 
   describe('verifyComment function', () => {
-    it('should throw InvariantError when comment not available', async () => {
+    it('should throw NotFoundError when comment not available', async () => {
       // Arrange
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
 
       // Action & Assert
-      await expect(replyRepositoryPostgres.verifyComment('comment-999')).rejects.toThrowError(NotFoundError);
+      await expect(replyRepositoryPostgres.verifyComment('comment-999'))
+        .rejects.toThrowError(NotFoundError);
     });
-  });
 
-  describe('verifyReplyOwner function', () => {
-    it('should throw AuthorizationError when user have no rights', async () => {
+    it('should not throw NotFoundError when comment available', async () => {
       // Arrange
-      const addReply = new AddReply({ content: 'New Reply' });
-      const fakeIdGenerator = () => '123';
-      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
 
-      // Action
-      await expect(replyRepositoryPostgres.addReply(addReply, 'comment-456', 'user-123'));
-
-      // Assert
-      await expect(replyRepositoryPostgres.verifyReplyOwner('user-456', 'reply-123'))
-        .rejects.toThrowError(AuthorizationError);
+      // Action & Assert
+      await expect(replyRepositoryPostgres.verifyComment('comment-456'))
+        .resolves.not.toThrow(NotFoundError);
     });
   });
 
@@ -91,46 +85,119 @@ describe('ReplyRepositoryPostgres', () => {
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
 
       // Action
-      await expect(replyRepositoryPostgres.addReply(addReply, 'comment-456', 'user-123'));
+      await replyRepositoryPostgres.addReply(addReply, 'comment-456', 'user-123');
 
       // Assert
       const reply = await RepliesTableTestHelper.findReplyById('reply-456');
-      console.log(`repl: ${reply}`);
+
       expect(reply).toHaveLength(1);
     });
 
-    // it('should return reply correctly', async () => {
-    //   // Arrange
-    //   const addReply = new AddReply({ content: 'New Reply' });
-    //   const fakeIdGenerator = () => '123';
-    //   const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
-    //
-    //   // Action
-    //   const addedReply = await expect(replyRepositoryPostgres.addReply(addReply, 'comment-456', 'user-123'));
-    //
-    //   // Assert
-    //   expect(addedReply).toStrictEqual(new AddedReply({
-    //     id: 'reply-123',
-    //     content: 'New Reply',
-    //     owner: 'user-123',
-    //   }));
-    // });
+    it('should return reply correctly', async () => {
+      // Arrange
+      const addReply = new AddReply({ content: 'New Reply' });
+      const fakeIdGenerator = () => '123';
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      const addedReply = await replyRepositoryPostgres.addReply(
+        addReply,
+        'comment-456',
+        'user-123',
+      );
+
+      // Assert
+      expect(addedReply).toStrictEqual(new AddedReply({
+        id: 'reply-123',
+        content: 'New Reply',
+        owner: 'user-123',
+      }));
+    });
   });
 
-  // describe('deleteReply', () => {
-  //   it('should persist delete reply', async () => {
-  //     // Arrange
-  //     const addReply = new AddReply({ content: 'New Reply' });
-  //     const fakeIdGenerator = () => '123';
-  //     const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
-  //     await replyRepositoryPostgres.addReply(addReply, 'thread-123', 'user-123');
-  //
-  //     // Action
-  //     await replyRepositoryPostgres.deleteReply('reply-123');
-  //
-  //     // Assert
-  //     const replyDeleted = await RepliesTableTestHelper.findReplyById('reply-123');
-  //     expect(replyDeleted.is_delete).toEqual(true);
-  //   });
-  // });
+  describe('verifyReplyOwner function', () => {
+    it('should throw NotFoundError when reply not available', async () => {
+      // Arrange
+      const addReply = new AddReply({ content: 'New Reply' });
+      const fakeIdGenerator = () => '123';
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      await replyRepositoryPostgres.addReply(
+        addReply,
+        'comment-456',
+        'user-456',
+      );
+
+      // Action
+      await expect(replyRepositoryPostgres.verifyReplyOwner('user-456', 'reply-789'))
+        .rejects.toThrowError(NotFoundError);
+    });
+
+    it('should throw AuthorizationError when user have no rights', async () => {
+      // Arrange
+      const addReply = new AddReply({ content: 'New Reply' });
+      const fakeIdGenerator = () => '123';
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      await replyRepositoryPostgres.addReply(
+        addReply,
+        'comment-456',
+        'user-456',
+      );
+
+      // Action
+      await expect(replyRepositoryPostgres.verifyReplyOwner('user-123', 'reply-123'))
+        .rejects.toThrowError(AuthorizationError);
+    });
+
+    it('should not throw AuthorizationError when user have rights', async () => {
+      // Arrange
+      const addReply = new AddReply({ content: 'New Reply' });
+      const fakeIdGenerator = () => '123';
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      await replyRepositoryPostgres.addReply(
+        addReply,
+        'comment-456',
+        'user-456',
+      );
+
+      // Action
+      await expect(replyRepositoryPostgres.verifyReplyOwner('user-456', 'reply-123'))
+        .resolves.not.toThrow(AuthorizationError);
+    });
+  });
+
+  describe('deleteReply', () => {
+    it('should throw NotFound Error when reply not found', async () => {
+      // Arrange
+      const addReply = new AddReply({ content: 'New Reply' });
+      const fakeIdGenerator = () => '123';
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
+      await replyRepositoryPostgres.addReply(addReply, 'comment-456', 'user-456');
+
+      // Action & Assert
+      await expect(replyRepositoryPostgres.deleteReply('reply-456'))
+        .rejects.toThrowError(NotFoundError);
+    });
+
+    it('should persist delete reply', async () => {
+      // Arrange
+      const addReply = new AddReply({ content: 'New Reply' });
+      const fakeIdGenerator = () => '123';
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
+      await replyRepositoryPostgres.addReply(addReply, 'comment-456', 'user-456');
+
+      // Action
+      await replyRepositoryPostgres.deleteReply('reply-123');
+
+      // Assert
+      const replyDeleted = await RepliesTableTestHelper.findReplyById('reply-123');
+
+      expect(replyDeleted[0].is_delete).toEqual(true);
+    });
+  });
 });

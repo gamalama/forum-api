@@ -23,17 +23,7 @@ const RepliesTableTestHelper = {
 
   async findReplyById(id) {
     const query = {
-      text: 'SELECT * FROM replies WHERE id = $1 and is_delete = FALSE',
-      values: [id],
-    };
-
-    const result = await pool.query(query);
-    return result.rows;
-  },
-
-  async findDeletedReplyById(id) {
-    const query = {
-      text: 'SELECT * FROM replies WHERE id = $1 and is_delete = TRUE',
+      text: 'SELECT * FROM replies WHERE id = $1',
       values: [id],
     };
 
