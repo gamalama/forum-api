@@ -40,9 +40,9 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       throw new NotFoundError('Thread tidak ditemukan');
     }
 
-    const comments = await this._getComments(threadId);
+    const comments = await this.#getComments(threadId);
 
-    const commentedThread = new CommentedThread({
+    return new CommentedThread({
       id: result.rows[0].id,
       title: result.rows[0].title,
       body: result.rows[0].body,
@@ -50,11 +50,9 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       username: result.rows[0].username,
       comments,
     });
-
-    return commentedThread;
   }
 
-  async _getComments(threadId) {
+  async #getComments(threadId) {
     const query = {
       text: `SELECT c.id, c.owner, c.updated_at, c.content, c.is_delete, u.username 
             FROM comments as c
@@ -70,11 +68,11 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       username: comment.username,
       date: comment.updated_at,
       content: comment.is_delete ? '**komentar telah dihapus**' : comment.content,
-      replies: await this._getReplies(comment.id),
+      replies: await this.#getReplies(comment.id),
     })));
   }
 
-  async _getReplies(commentId) {
+  async #getReplies(commentId) {
     const query = {
       text: `SELECT r.id, r.content, r.updated_at, r.owner, r.is_delete, u.username
             FROM replies as r
