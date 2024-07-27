@@ -1,7 +1,4 @@
 const ReplyRepository = require('../../Domains/replies/ReplyRepository');
-const NotFoundError = require('../../Commons/exceptions/NotFoundError');
-const AddedReply = require('../../Domains/replies/entities/AddedReply');
-const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 
 class ReplyRepositoryPostgres extends ReplyRepository {
   constructor(pool, idGenerator) {
@@ -16,11 +13,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
       values: [commentId],
     };
 
-    const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError('komentar tidak ditemukan');
-    }
+    return this._pool.query(query);
   }
 
   async addReply(addReply, commentId, owner) {
@@ -34,9 +27,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
       values: [id, content, commentId, owner, createdAt, createdAt],
     };
 
-    const result = await this._pool.query(query);
-
-    return new AddedReply({ ...result.rows[0] });
+    return this._pool.query(query);
   }
 
   async verifyReplyOwner(ownerId, replyId) {
@@ -45,15 +36,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
       values: [replyId],
     };
 
-    const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError('balasan tidak ditemukan');
-    }
-
-    if (result.rows[0].owner !== ownerId) {
-      throw new AuthorizationError('tidak berhak menghapus balasan');
-    }
+    return this._pool.query(query);
   }
 
   async deleteReply(replyId) {
@@ -62,11 +45,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
       values: [replyId],
     };
 
-    const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError('balasan tidak ditemukan');
-    }
+    return this._pool.query(query);
   }
 }
 
