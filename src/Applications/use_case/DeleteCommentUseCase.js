@@ -1,12 +1,33 @@
+const NotFoundError = require('../../Commons/exceptions/NotFoundError');
+const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
+
 class DeleteCommentUseCase {
   constructor({ commentRepository }) {
     this._commentRepository = commentRepository;
   }
 
   async execute(ownerId, threadId, commentId) {
-    await this._commentRepository.verifyThread(threadId);
-    await this._commentRepository.verifyCommentOwner(ownerId, commentId);
-    return this._commentRepository.deleteComment(commentId);
+    const verifyThread = await this._commentRepository.verifyThread(threadId);
+
+    if (verifyThread.rows.length === 0) {
+      throw new NotFoundError('thread tidak ditemukan');
+    }
+
+    const verifyCommentOwner = await this._commentRepository.verifyCommentOwner(ownerId, commentId);
+
+    if (verifyCommentOwner.rows.length === 0) {
+      throw new NotFoundError('komentar tidak ditemukan');
+    }
+
+    if (verifyCommentOwner.rows[0].owner !== ownerId) {
+      throw new AuthorizationError('tidak berhak menghapus komentar');
+    }
+
+    const deleteComment = await this._commentRepository.deleteComment(commentId);
+
+    if (!deleteComment.rowCount) {
+      throw new NotFoundError('komentar tidak ditemukan di database');
+    }
   }
 }
 
