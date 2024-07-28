@@ -52,7 +52,8 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       text: `SELECT r.id, r.content, r.updated_at, r.owner, r.is_delete, u.username
             FROM replies as r
             INNER JOIN users as u ON r.owner = u.id
-            WHERE comment = $1`,
+            WHERE comment = $1
+            ORDER BY r.updated_at ASC`,
       values: [commentId],
     };
 

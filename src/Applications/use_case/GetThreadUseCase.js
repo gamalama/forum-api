@@ -7,7 +7,6 @@ class GetThreadUseCase {
   }
 
   async execute(threadId) {
-    // return this._threadRepository.getThread(threadId);
     const getThread = await this._threadRepository.getThread(threadId);
 
     if (!getThread.rowCount) {
