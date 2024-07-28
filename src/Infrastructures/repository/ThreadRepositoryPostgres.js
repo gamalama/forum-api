@@ -1,7 +1,5 @@
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 const AddedThread = require('../../Domains/threads/entities/AddedThread');
-const NotFoundError = require('../../Commons/exceptions/NotFoundError');
-const CommentedThread = require('../../Domains/threads/entities/CommentedThread');
 
 class ThreadRepositoryPostgres extends ThreadRepository {
   constructor(pool, idGenerator) {
@@ -34,25 +32,10 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       values: [threadId],
     };
 
-    const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError('Thread tidak ditemukan');
-    }
-
-    const comments = await this.#getComments(threadId);
-
-    return new CommentedThread({
-      id: result.rows[0].id,
-      title: result.rows[0].title,
-      body: result.rows[0].body,
-      date: result.rows[0].created_at,
-      username: result.rows[0].username,
-      comments,
-    });
+    return this._pool.query(query);
   }
 
-  async #getComments(threadId) {
+  async getComments(threadId) {
     const query = {
       text: `SELECT c.id, c.owner, c.updated_at, c.content, c.is_delete, u.username 
             FROM comments as c
@@ -61,18 +44,10 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       values: [threadId],
     };
 
-    const comments = await this._pool.query(query);
-
-    return Promise.all(comments.rows.map(async (comment) => ({
-      id: comment.id,
-      username: comment.username,
-      date: comment.updated_at,
-      content: comment.is_delete ? '**komentar telah dihapus**' : comment.content,
-      replies: await this.#getReplies(comment.id),
-    })));
+    return this._pool.query(query);
   }
 
-  async #getReplies(commentId) {
+  async getReplies(commentId) {
     const query = {
       text: `SELECT r.id, r.content, r.updated_at, r.owner, r.is_delete, u.username
             FROM replies as r
@@ -81,14 +56,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       values: [commentId],
     };
 
-    const replies = await this._pool.query(query);
-
-    return replies.rows.map((reply) => ({
-      id: reply.id,
-      content: reply.is_delete ? '**balasan telah dihapus**' : reply.content,
-      date: reply.updated_at,
-      username: reply.username,
-    }));
+    return this._pool.query(query);
   }
 }
 
