@@ -23,11 +23,7 @@ class DeleteCommentUseCase {
       throw new AuthorizationError('tidak berhak menghapus komentar');
     }
 
-    const deleteComment = await this._commentRepository.deleteComment(commentId);
-
-    if (!deleteComment.rowCount) {
-      throw new NotFoundError('komentar tidak ditemukan di database');
-    }
+    this._commentRepository.deleteComment(commentId);
   }
 }
 

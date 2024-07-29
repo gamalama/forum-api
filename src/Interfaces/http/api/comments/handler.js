@@ -23,7 +23,7 @@ class CommentsHandler {
     }).code(201);
   }
 
-  async deleteCommentHandler(request, h) {
+  async deleteCommentHandler(request) {
     const { id: ownerId } = request.auth.credentials;
     const { threadId } = request.params;
     const { commentId } = request.params;

@@ -9,6 +9,7 @@ const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
+const RepliesTableTestHelper = require('../../../../tests/RepliesTableTestHelper');
 
 describe('ThreadRepositoryPostgres', () => {
   beforeEach(async () => {
@@ -50,47 +51,9 @@ describe('ThreadRepositoryPostgres', () => {
       const thread = await ThreadsTableTestHelper.findThreadById('thread-123');
       expect(thread).toHaveLength(1);
     });
-
-    it('should return thread correctly', async () => {
-      // Arrange
-      const addThread = new AddThread({
-        title: 'New Thread',
-        body: 'New thread body',
-      });
-      const fakeIdGenerator = () => '123';
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
-
-      // Action
-      const addedThread = await threadRepositoryPostgres.addThread(addThread, 'user-456');
-
-      // Assert
-      expect(addedThread).toStrictEqual(new AddedThread({
-        id: 'thread-123',
-        title: 'New Thread',
-        owner: 'user-456',
-      }));
-    });
   });
 
   describe('getThread function', () => {
-    it('should throw NotFoundError when thread not available', async () => {
-      // Arrange
-      /** Add thread */
-      const addThread = new AddThread({
-        title: 'New Thread',
-        body: 'New thread body',
-      });
-      const fakeIdGenerator = () => '123';
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
-
-      // Action
-      await threadRepositoryPostgres.addThread(addThread, 'user-456');
-
-      // Action & Assert
-      await expect(threadRepositoryPostgres.getThread('thread-456'))
-        .rejects.toThrowError(NotFoundError);
-    });
-
     it('should persist get thread', async () => {
       const fakeIdGenerator = () => '123';
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
@@ -109,16 +72,50 @@ describe('ThreadRepositoryPostgres', () => {
       const commentedThread = await threadRepositoryPostgres.getThread('thread-123');
 
       // Assert
-      await expect(commentedThread)
-        // .resolves.not.toThrow(NotFoundError);
-        .toStrictEqual(new CommentedThread({
-          id: 'thread-123',
-          title: 'New Thread 123',
-          body: 'New thread body 123.',
-          date: '2024-05-10T17:14:31.573Z',
-          username: 'dicoding',
-          comments: [],
-        }));
+      await expect(commentedThread.rows).toHaveLength(1);
+    });
+  });
+
+  describe('getReplies function', () => {
+    it('should persist get replies', async () => {
+      const fakeIdGenerator = () => '123';
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+
+      /** Add thread */
+      await ThreadsTableTestHelper.addThread({
+        id: 'thread-123',
+        title: 'New Thread 123',
+        body: 'New thread body 123.',
+        owner: 'user-456',
+        created_at: '2024-05-10T17:14:31.573Z',
+        updated_at: '2024-05-10T17:14:31.573Z',
+      });
+
+      /** Add comment * */
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        content: 'Sebuah komentar',
+        thread: 'thread-123',
+        owner: 'user-456',
+        is_delete: false,
+        created_at: '2024-05-10T17:14:31.573Z',
+        updated_at: '2024-05-10T17:14:31.573Z',
+      });
+
+      /** Add Reply * */
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-123',
+        content: 'Sebuah balasan',
+        comment: 'comment-123',
+        owner: 'user-456',
+        is_delete: false,
+        created_at: '2024-05-10T17:14:31.573Z',
+        updated_at: '2024-05-10T17:14:31.573Z',
+      });
+
+      // Action & Assert
+      const replyResult = await threadRepositoryPostgres.getReplies('comment-123');
+      await expect(replyResult.rows).toHaveLength(1);
     });
   });
 });

@@ -29,11 +29,7 @@ class DeleteReplyUseCase {
       throw new AuthorizationError('tidak berhak menghapus balasan');
     }
 
-    const deleteReply = await this._replyRepository.deleteReply(replyId);
-
-    if (!deleteReply.rowCount) {
-      throw new NotFoundError('balasan tidak ditemukan');
-    }
+    await this._replyRepository.deleteReply(replyId);
   }
 }
 

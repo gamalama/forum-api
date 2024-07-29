@@ -90,8 +90,6 @@ const createServer = async (container) => {
       });
       newResponse.code(500);
 
-      console.log(response);
-
       return newResponse;
     }
 

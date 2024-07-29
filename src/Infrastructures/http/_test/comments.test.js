@@ -1,3 +1,4 @@
+const { response } = require('@hapi/hapi/lib/validation');
 const pool = require('../../database/postgres/pool');
 const container = require('../../container');
 const createServer = require('../createServer');
@@ -72,6 +73,67 @@ describe('HTTP server', () => {
       expect(response.statusCode).toEqual(201);
       expect(responseJson.status).toEqual('success');
       expect(responseJson.data.addedComment).toBeDefined();
+    });
+  });
+
+  describe('when delete comment', () => {
+    it('should response 200 and comment is deleted', async () => {
+      // Add User for adding thread
+      const server = await createServer(container);
+      await server.inject({
+        method: 'POST',
+        url: '/users',
+        payload: {
+          username: 'dicoding',
+          password: 'secret',
+          fullname: 'Dicoding Indonesia',
+        },
+      });
+      const loginPayload = {
+        username: 'dicoding',
+        password: 'secret',
+      };
+      const loginResponse = await server.inject({
+        method: 'POST',
+        url: '/authentications',
+        payload: loginPayload,
+      });
+      const { data: { accessToken } } = JSON.parse(loginResponse.payload);
+
+      // Add thread
+      const addThreadPayload = {
+        title: 'New Thread 123',
+        body: 'New Thread body.',
+      };
+      const addThreadResponse = await server.inject({
+        method: 'POST',
+        url: '/threads',
+        payload: addThreadPayload,
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const threadId = JSON.parse(addThreadResponse.payload).data.addedThread.id;
+
+      // Add Comment
+      const addCommentPayload = {
+        content: 'New comment',
+      };
+      const addCommentResponse = await server.inject({
+        method: 'POST',
+        url: `/threads/${threadId}/comments`,
+        payload: addCommentPayload,
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const commentId = JSON.parse(addCommentResponse.payload).data.addedComment.id;
+
+      const deleteCommentResponse = await server.inject({
+        method: 'DELETE',
+        url: `/threads/${threadId}/comments/${commentId}`,
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      const responseJson = JSON.parse(deleteCommentResponse.payload);
+      expect(deleteCommentResponse.statusCode).toEqual(200);
+      expect(responseJson.status).toEqual('success');
     });
   });
 });

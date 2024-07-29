@@ -46,26 +46,18 @@ describe('CommentRepositoryPostgres', () => {
   });
 
   describe('verifyThread function', () => {
-    it('should throw InvariantError when thread not available', async () => {
+    it('should return rows correctly', async () => {
       // Arrange
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
       // Action & Assert
-      await expect(commentRepositoryPostgres.verifyThread('thread-999')).rejects.toThrowError(NotFoundError);
-    });
-
-    it('should not throw InvariantError when thread available', async () => {
-      // Arrange
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      await expect(commentRepositoryPostgres.verifyThread('thread-123'))
-        .resolves.not.toThrow(NotFoundError);
+      const result = await commentRepositoryPostgres.verifyThread('thread-123');
+      await expect(result.rows.length).toEqual(1);
     });
   });
 
   describe('verifyCommentOwner function', () => {
-    it('should throw NotFoundError when comment not available', async () => {
+    it('should return rows correctly', async () => {
       // Arrange
       const addComment = new AddComment({ content: 'New Comment' });
       const fakeIdGenerator = () => '123';
@@ -75,36 +67,8 @@ describe('CommentRepositoryPostgres', () => {
       await commentRepositoryPostgres.addComment(addComment, 'thread-123', 'user-123');
 
       // Assert
-      await expect(commentRepositoryPostgres.verifyCommentOwner('user-456', 'comment-456'))
-        .rejects.toThrowError(NotFoundError);
-    });
-
-    it('should throw AuthorizationError when user have no rights', async () => {
-      // Arrange
-      const addComment = new AddComment({ content: 'New Comment' });
-      const fakeIdGenerator = () => '123';
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-
-      // Action
-      await commentRepositoryPostgres.addComment(addComment, 'thread-123', 'user-123');
-
-      // Assert
-      await expect(commentRepositoryPostgres.verifyCommentOwner('user-456', 'comment-123'))
-        .rejects.toThrowError(AuthorizationError);
-    });
-
-    it('should not throw AuthorizationError when user have rights', async () => {
-      // Arrange
-      const addComment = new AddComment({ content: 'New Comment' });
-      const fakeIdGenerator = () => '123';
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-
-      // Action
-      await commentRepositoryPostgres.addComment(addComment, 'thread-123', 'user-123');
-
-      // Assert
-      await expect(commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-123'))
-        .resolves.not.toThrow(AuthorizationError);
+      const result = await commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-123');
+      await expect(result.rows.length).toEqual(1);
     });
   });
 
@@ -122,42 +86,9 @@ describe('CommentRepositoryPostgres', () => {
       const comment = await CommentsTableTestHelper.findCommentById('comment-456');
       expect(comment).toHaveLength(1);
     });
-
-    it('should return comment correctly', async () => {
-      // Arrange
-      const addComment = new AddComment({ content: 'New Comment' });
-      const fakeIdGenerator = () => '456';
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-
-      // Action
-      const addedComment = await commentRepositoryPostgres.addComment(
-        addComment,
-        'thread-123',
-        'user-456',
-      );
-
-      // Assert
-      expect(addedComment).toStrictEqual(new AddedComment({
-        id: 'comment-456',
-        content: 'New Comment',
-        owner: 'user-456',
-      }));
-    });
   });
 
   describe('deleteComment', () => {
-    it('should throw NotFound Error when comment not found', async () => {
-      // Arrange
-      const addComment = new AddComment({ content: 'New Comment will be deleted' });
-      const fakeIdGenerator = () => '456';
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
-      await commentRepositoryPostgres.addComment(addComment, 'thread-123', 'user-456');
-
-      // Action
-      await expect(commentRepositoryPostgres.deleteComment('comment-789'))
-        .rejects.toThrowError(NotFoundError);
-    });
-
     it('should persist delete comment', async () => {
       // Arrange
       const addComment = new AddComment({ content: 'New Comment will be deleted' });

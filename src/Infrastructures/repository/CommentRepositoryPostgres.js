@@ -1,5 +1,4 @@
 const CommentRepository = require('../../Domains/comments/CommentRepository');
-const AddedComment = require('../../Domains/comments/entities/AddedComment');
 
 class CommentRepositoryPostgres extends CommentRepository {
   constructor(pool, idGenerator) {
@@ -36,9 +35,7 @@ class CommentRepositoryPostgres extends CommentRepository {
       values: [id, content, threadId, owner, createdAt, createdAt],
     };
 
-    const result = await this._pool.query(query);
-
-    return new AddedComment({ ...result.rows[0] });
+    return this._pool.query(query);
   }
 
   async deleteComment(commentId) {
