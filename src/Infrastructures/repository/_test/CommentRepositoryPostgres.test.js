@@ -7,6 +7,7 @@ const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
 const AddedComment = require('../../../Domains/comments/entities/AddedComment');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
+const ReplyRepositoryPostgres = require('../ReplyRepositoryPostgres');
 
 describe('CommentRepositoryPostgres', () => {
   beforeEach(async () => {
@@ -45,14 +46,37 @@ describe('CommentRepositoryPostgres', () => {
     await pool.end();
   });
 
-  describe('verifyThread function', () => {
-    it('should return rows correctly', async () => {
+  describe('verifyComment function', () => {
+    it('should throw error when comment not found', async () => {
       // Arrange
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+      const addComment = new AddComment({ content: 'New Comment' });
+      const fakeIdGenerator = () => '123';
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
 
-      // Action & Assert
-      const result = await commentRepositoryPostgres.verifyThread('thread-123');
-      await expect(result.rows.length).toEqual(1);
+      // Action
+      await commentRepositoryPostgres.addComment(addComment, 'thread-123', 'user-123');
+      // const result = await commentRepositoryPostgres.verifyComment('comment-123');
+
+      // Assert
+      const verifyComment = async () => commentRepositoryPostgres.verifyComment('comment-456');
+      await expect(verifyComment)
+        .rejects
+        .toThrowError('komentar tidak ditemukan');
+    });
+
+    it('should not throw error', async () => {
+      // Arrange
+      const addComment = new AddComment({ content: 'New Comment' });
+      const fakeIdGenerator = () => '123';
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+
+      // Action
+      await commentRepositoryPostgres.addComment(addComment, 'thread-123', 'user-123');
+      // const result = await commentRepositoryPostgres.verifyComment('comment-123');
+
+      // Assert
+      await expect(() => commentRepositoryPostgres.verifyComment('comment-123'))
+        .not.toThrowError();
     });
   });
 

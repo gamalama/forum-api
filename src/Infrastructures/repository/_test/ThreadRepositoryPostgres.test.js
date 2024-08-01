@@ -1,15 +1,9 @@
 const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper');
 const pool = require('../../database/postgres/pool');
 const AddThread = require('../../../Domains/threads/entities/AddThread');
-const AddedThread = require('../../../Domains/threads/entities/AddedThread');
-const AddComment = require('../../../Domains/comments/entities/AddComment');
-const CommentedThread = require('../../../Domains/threads/entities/CommentedThread');
 const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
-const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
-const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
-const RepliesTableTestHelper = require('../../../../tests/RepliesTableTestHelper');
 
 describe('ThreadRepositoryPostgres', () => {
   beforeEach(async () => {
@@ -76,10 +70,20 @@ describe('ThreadRepositoryPostgres', () => {
     });
   });
 
-  describe('getReplies function', () => {
-    it('should persist get replies', async () => {
-      const fakeIdGenerator = () => '123';
-      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
+  describe('verifyThread function', () => {
+    it('should throw error when thread not found', async () => {
+      // const fakeIdGenerator = () => '123';
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
+
+      // Action
+      const verifyThread = async () => threadRepositoryPostgres.verifyThread('thread-001');
+
+      // Assert
+      await expect(verifyThread).rejects.toThrowError('thread tidak ditemukan');
+    });
+
+    it('should not throw error', async () => {
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
 
       /** Add thread */
       await ThreadsTableTestHelper.addThread({
@@ -91,31 +95,11 @@ describe('ThreadRepositoryPostgres', () => {
         updated_at: '2024-05-10T17:14:31.573Z',
       });
 
-      /** Add comment * */
-      await CommentsTableTestHelper.addComment({
-        id: 'comment-123',
-        content: 'Sebuah komentar',
-        thread: 'thread-123',
-        owner: 'user-456',
-        is_delete: false,
-        created_at: '2024-05-10T17:14:31.573Z',
-        updated_at: '2024-05-10T17:14:31.573Z',
-      });
+      // Action
+      const verifyThread = async () => threadRepositoryPostgres.verifyThread('thread-123');
 
-      /** Add Reply * */
-      await RepliesTableTestHelper.addReply({
-        id: 'reply-123',
-        content: 'Sebuah balasan',
-        comment: 'comment-123',
-        owner: 'user-456',
-        is_delete: false,
-        created_at: '2024-05-10T17:14:31.573Z',
-        updated_at: '2024-05-10T17:14:31.573Z',
-      });
-
-      // Action & Assert
-      const replyResult = await threadRepositoryPostgres.getReplies('comment-123');
-      await expect(replyResult.rows).toHaveLength(1);
+      // Assert
+      await expect(verifyThread).not.toThrowError();
     });
   });
 });

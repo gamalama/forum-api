@@ -44,6 +44,16 @@ describe('ReplyRepositoryPostgres', () => {
       created_at: '2024-05-10T17:15:31.573Z',
       updated_at: '2024-05-10T17:15:31.573Z',
     });
+
+    await RepliesTableTestHelper.addReply({
+      id: 'reply-789',
+      content: 'New reply 456',
+      comment: 'comment-456',
+      owner: 'user-123',
+      is_delete: false,
+      created_at: '2024-05-10T17:15:31.573Z',
+      updated_at: '2024-05-10T17:15:31.573Z',
+    });
   });
 
   afterEach(async () => {
@@ -57,13 +67,14 @@ describe('ReplyRepositoryPostgres', () => {
     await pool.end();
   });
 
-  describe('verifyComment function', () => {
-    it('should return rows correctly', async () => {
+  describe('getReplies function', () => {
+    it('should return reply result rows correctly', async () => {
       // Arrange
-      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
-      const result = await replyRepositoryPostgres.verifyComment('comment-456');
-      // Action & Assert
-      await expect(result.rows.length).toEqual(1);
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool);
+      const replies = await replyRepositoryPostgres.getReplies('comment-456');
+
+      // Assert
+      expect(replies.rows).toHaveLength(1);
     });
   });
 

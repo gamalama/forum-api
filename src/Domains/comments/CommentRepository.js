@@ -1,6 +1,6 @@
 class CommentRepository {
   async verifyComment(commentId) {
-    throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
+    throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 
   async getComments(threadid) {
