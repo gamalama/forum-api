@@ -20,6 +20,18 @@ class CommentRepositoryPostgres extends CommentRepository {
     }
   }
 
+  async getComments(threadId) {
+    const query = {
+      text: `SELECT c.id, c.owner, c.updated_at, c.content, c.is_delete, u.username 
+            FROM comments as c
+            INNER JOIN users as u ON c.owner = u.id
+            WHERE thread = $1`,
+      values: [threadId],
+    };
+
+    return this._pool.query(query);
+  }
+
   async verifyCommentOwner(ownerId, commentId) {
     const query = {
       text: 'SELECT * FROM comments WHERE id = $1',

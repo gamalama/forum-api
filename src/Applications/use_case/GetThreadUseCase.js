@@ -2,8 +2,10 @@ const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const CommentedThread = require('../../Domains/threads/entities/CommentedThread');
 
 class GetThreadUseCase {
-  constructor({ threadRepository }) {
+  constructor({ threadRepository, commentRepository, replyRepository }) {
     this._threadRepository = threadRepository;
+    this._commentRepository = commentRepository;
+    this._replyRepository = replyRepository;
   }
 
   async execute(threadId) {
@@ -13,10 +15,10 @@ class GetThreadUseCase {
       throw new NotFoundError('Thread tidak ditemukan');
     }
 
-    const getComments = await this._threadRepository.getComments(threadId);
+    const getComments = await this._commentRepository.getComments(threadId);
 
     const getReplies = async (commentId) => {
-      const replies = await this._threadRepository.getReplies(commentId);
+      const replies = await this._replyRepository.getReplies(commentId);
       return replies.rows.map((reply) => ({
         id: reply.id,
         content: reply.is_delete ? '**balasan telah dihapus**' : reply.content,

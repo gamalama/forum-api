@@ -31,31 +31,6 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
     return this._pool.query(query);
   }
-
-  async getComments(threadId) {
-    const query = {
-      text: `SELECT c.id, c.owner, c.updated_at, c.content, c.is_delete, u.username 
-            FROM comments as c
-            INNER JOIN users as u ON c.owner = u.id
-            WHERE thread = $1`,
-      values: [threadId],
-    };
-
-    return this._pool.query(query);
-  }
-
-  async getReplies(commentId) {
-    const query = {
-      text: `SELECT r.id, r.content, r.updated_at, r.owner, r.is_delete, u.username
-            FROM replies as r
-            INNER JOIN users as u ON r.owner = u.id
-            WHERE comment = $1
-            ORDER BY r.updated_at ASC`,
-      values: [commentId],
-    };
-
-    return this._pool.query(query);
-  }
 }
 
 module.exports = ThreadRepositoryPostgres;
