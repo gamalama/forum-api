@@ -1,8 +1,4 @@
 class ReplyRepository {
-  async verifyComment(commentId) {
-    throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
-  }
-
   async getReplies(commentId) {
     throw new Error('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }

@@ -1,5 +1,4 @@
 const ReplyRepository = require('../../Domains/replies/ReplyRepository');
-const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 
 class ReplyRepositoryPostgres extends ReplyRepository {
   constructor(pool, idGenerator) {
