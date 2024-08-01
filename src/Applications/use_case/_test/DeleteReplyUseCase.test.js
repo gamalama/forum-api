@@ -29,7 +29,7 @@ describe('DeleteReplyUseCase', () => {
       'thread-123',
       'comment-123',
       'reply-123',
-    )).rejects.toThrowError('thread tidak ditemukan');
+    )).rejects.toThrowError('REPLY_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   });
 
   it('should throw error when comment not found', async () => {

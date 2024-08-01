@@ -8,18 +8,6 @@ class CommentRepositoryPostgres extends CommentRepository {
     this._idGenerator = idGenerator;
   }
 
-  async verifyThread(threadId) {
-    const query = {
-      text: 'SELECT * FROM threads WHERE id = $1',
-      values: [threadId],
-    };
-
-    const result = await this._pool.query(query);
-    if (result.rows.length === 0) {
-      throw new NotFoundError('thread tidak ditemukan');
-    }
-  }
-
   async getComments(threadId) {
     const query = {
       text: `SELECT c.id, c.owner, c.updated_at, c.content, c.is_delete, u.username 
@@ -30,6 +18,18 @@ class CommentRepositoryPostgres extends CommentRepository {
     };
 
     return this._pool.query(query);
+  }
+
+  async verifyComment(commentId) {
+    const query = {
+      text: 'SELECT * FROM comments WHERE id = $1',
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError('komentar tidak ditemukan');
+    }
   }
 
   async verifyCommentOwner(ownerId, commentId) {

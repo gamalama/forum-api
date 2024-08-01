@@ -2,19 +2,15 @@ const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 
 class DeleteReplyUseCase {
-  constructor({ replyRepository, commentRepository }) {
-    this._replyRepository = replyRepository;
+  constructor({ threadRepository, commentRepository, replyRepository }) {
+    this._threadRepository = threadRepository;
     this._commentRepository = commentRepository;
+    this._replyRepository = replyRepository;
   }
 
   async execute(ownerId, threadId, commentId, replyId) {
-    await this._commentRepository.verifyThread(threadId);
-
-    const verifyComment = await this._replyRepository.verifyComment(commentId);
-
-    if (!verifyComment.rowCount) {
-      throw new NotFoundError('komentar tidak ditemukan');
-    }
+    await this._threadRepository.verifyThread(threadId);
+    await this._commentRepository.verifyComment(commentId);
 
     const verifyReplyOwner = await this._replyRepository.verifyReplyOwner(ownerId, replyId);
     if (!verifyReplyOwner.rowCount) {

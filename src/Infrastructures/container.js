@@ -226,6 +226,10 @@ container.register([
       injectType: 'destructuring',
       dependencies: [
         {
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
+        },
+        {
           name: 'commentRepository',
           internal: CommentRepository.name,
         },
@@ -238,6 +242,10 @@ container.register([
     parameter: {
       injectType: 'destructuring',
       dependencies: [
+        {
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
+        },
         {
           name: 'commentRepository',
           internal: CommentRepository.name,
@@ -273,12 +281,16 @@ container.register([
       injectType: 'destructuring',
       dependencies: [
         {
-          name: 'replyRepository',
-          internal: ReplyRepository.name,
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
         },
         {
           name: 'commentRepository',
           internal: CommentRepository.name,
+        },
+        {
+          name: 'replyRepository',
+          internal: ReplyRepository.name,
         },
       ],
     },
@@ -290,12 +302,16 @@ container.register([
       injectType: 'destructuring',
       dependencies: [
         {
-          name: 'replyRepository',
-          internal: ReplyRepository.name,
+          name: 'threadRepository',
+          internal: ThreadRepository.name,
         },
         {
           name: 'commentRepository',
           internal: CommentRepository.name,
+        },
+        {
+          name: 'replyRepository',
+          internal: ReplyRepository.name,
         },
       ],
     },

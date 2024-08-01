@@ -1,19 +1,11 @@
 const ReplyRepository = require('../../Domains/replies/ReplyRepository');
+const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 
 class ReplyRepositoryPostgres extends ReplyRepository {
   constructor(pool, idGenerator) {
     super();
     this._pool = pool;
     this._idGenerator = idGenerator;
-  }
-
-  async verifyComment(commentId) {
-    const query = {
-      text: 'SELECT * FROM comments WHERE id = $1',
-      values: [commentId],
-    };
-
-    return this._pool.query(query);
   }
 
   async getReplies(commentId) {

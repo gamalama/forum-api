@@ -2,12 +2,13 @@ const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
 
 class DeleteCommentUseCase {
-  constructor({ commentRepository }) {
+  constructor({ threadRepository, commentRepository }) {
     this._commentRepository = commentRepository;
+    this._threadRepository = threadRepository;
   }
 
   async execute(ownerId, threadId, commentId) {
-    await this._commentRepository.verifyThread(threadId);
+    await this._threadRepository.verifyThread(threadId);
 
     const verifyCommentOwner = await this._commentRepository.verifyCommentOwner(ownerId, commentId);
 

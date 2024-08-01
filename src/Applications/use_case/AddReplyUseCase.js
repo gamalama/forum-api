@@ -1,22 +1,18 @@
 const AddReply = require('../../Domains/replies/entities/AddReply');
-const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const AddedReply = require('../../Domains/replies/entities/AddedReply');
 
 class AddReplyUseCase {
-  constructor({ commentRepository, replyRepository }) {
-    this._replyRepository = replyRepository;
+  constructor({ threadRepository, commentRepository, replyRepository }) {
+    this._threadRepository = threadRepository;
     this._commentRepository = commentRepository;
+    this._replyRepository = replyRepository;
   }
 
   async execute(useCasePayload, threadId, commentId, ownerId) {
     const addReply = new AddReply(useCasePayload);
-    await this._commentRepository.verifyThread(threadId);
+    await this._threadRepository.verifyThread(threadId);
 
-    const verifyComment = await this._replyRepository.verifyComment(commentId);
-
-    if (!verifyComment.rowCount) {
-      throw new NotFoundError('komentar tidak ditemukan');
-    }
+    await this._commentRepository.verifyComment(commentId);
 
     const addedReply = await this._replyRepository.addReply(addReply, commentId, ownerId);
     return new AddedReply({ ...addedReply.rows[0] });
