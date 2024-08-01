@@ -7,11 +7,7 @@ class DeleteCommentUseCase {
   }
 
   async execute(ownerId, threadId, commentId) {
-    const verifyThread = await this._commentRepository.verifyThread(threadId);
-
-    if (verifyThread.rows.length === 0) {
-      throw new NotFoundError('thread tidak ditemukan');
-    }
+    await this._commentRepository.verifyThread(threadId);
 
     const verifyCommentOwner = await this._commentRepository.verifyCommentOwner(ownerId, commentId);
 

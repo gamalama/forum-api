@@ -1,4 +1,5 @@
 const CommentRepository = require('../../Domains/comments/CommentRepository');
+const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 
 class CommentRepositoryPostgres extends CommentRepository {
   constructor(pool, idGenerator) {
@@ -13,7 +14,10 @@ class CommentRepositoryPostgres extends CommentRepository {
       values: [threadId],
     };
 
-    return this._pool.query(query);
+    const result = await this._pool.query(query);
+    if (result.rows.length === 0) {
+      throw new NotFoundError('thread tidak ditemukan');
+    }
   }
 
   async verifyCommentOwner(ownerId, commentId) {
