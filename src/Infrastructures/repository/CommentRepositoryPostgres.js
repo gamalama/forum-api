@@ -17,7 +17,8 @@ class CommentRepositoryPostgres extends CommentRepository {
       values: [threadId],
     };
 
-    return this._pool.query(query);
+    const { rows } = await this._pool.query(query);
+    return rows;
   }
 
   async verifyComment(commentId) {

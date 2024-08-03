@@ -11,7 +11,7 @@ class GetThreadUseCase {
   async execute(threadId) {
     const getThread = await this._threadRepository.getThread(threadId);
 
-    if (!getThread.rowCount) {
+    if (getThread.length === 0) {
       throw new NotFoundError('Thread tidak ditemukan');
     }
 
@@ -19,7 +19,7 @@ class GetThreadUseCase {
 
     const getReplies = async (commentId) => {
       const replies = await this._replyRepository.getReplies(commentId);
-      return replies.rows.map((reply) => ({
+      return replies.map((reply) => ({
         id: reply.id,
         content: reply.is_delete ? '**balasan telah dihapus**' : reply.content,
         date: reply.updated_at,
@@ -27,7 +27,7 @@ class GetThreadUseCase {
       }));
     };
 
-    const comments = await Promise.all(getComments.rows.map(async (comment) => ({
+    const comments = await Promise.all(getComments.map(async (comment) => ({
       id: comment.id,
       username: comment.username,
       date: comment.updated_at,
@@ -36,11 +36,11 @@ class GetThreadUseCase {
     })));
 
     return new CommentedThread({
-      id: getThread.rows[0].id,
-      title: getThread.rows[0].title,
-      body: getThread.rows[0].body,
-      date: getThread.rows[0].created_at,
-      username: getThread.rows[0].username,
+      id: getThread[0].id,
+      title: getThread[0].title,
+      body: getThread[0].body,
+      date: getThread[0].created_at,
+      username: getThread[0].username,
       comments,
     });
   }
