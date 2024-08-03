@@ -74,7 +74,7 @@ describe('ReplyRepositoryPostgres', () => {
       const replies = await replyRepositoryPostgres.getReplies('comment-456');
 
       // Assert
-      expect(replies.rows).toHaveLength(1);
+      expect(replies).toHaveLength(1);
     });
   });
 

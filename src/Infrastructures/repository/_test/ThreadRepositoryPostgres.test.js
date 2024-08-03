@@ -66,7 +66,7 @@ describe('ThreadRepositoryPostgres', () => {
       const commentedThread = await threadRepositoryPostgres.getThread('thread-123');
 
       // Assert
-      await expect(commentedThread.rows).toHaveLength(1);
+      await expect(commentedThread).toHaveLength(1);
     });
   });
 

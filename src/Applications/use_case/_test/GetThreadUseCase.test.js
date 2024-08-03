@@ -13,9 +13,7 @@ describe('GetThreadUseCase', () => {
 
     /** mocking needed function */
     mockThreadRepository.getThread = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        rowCount: 0,
-      }));
+      .mockImplementation(() => Promise.resolve([]));
 
     /** creating use case instance */
     const getThreadUseCase = new GetThreadUseCase({ threadRepository: mockThreadRepository });
@@ -41,27 +39,23 @@ describe('GetThreadUseCase', () => {
 
     /** mocking needed function */
     mockThreadRepository.getThread = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        rowCount: 1, rows: [mockCommentedThread],
-      }));
+      .mockImplementation(() => Promise.resolve(
+        [mockCommentedThread],
+      ));
     mockCommentRepository.getComments = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        rows: [{
-          id: 'comment-_pby2_tmXV6bcvcdev8xk',
-          username: 'johndoe',
-          updated_at: '2021-08-08T07:22:33.555Z',
-          content: 'sebuah comment',
-        }],
-      }));
+      .mockImplementation(() => Promise.resolve([{
+        id: 'comment-_pby2_tmXV6bcvcdev8xk',
+        username: 'johndoe',
+        updated_at: '2021-08-08T07:22:33.555Z',
+        content: 'sebuah comment',
+      }]));
     mockReplyRepository.getReplies = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        rows: [{
-          id: 'reply-xNBtm9HPR-492AeiimpfN',
-          content: 'sebuah balasan',
-          updated_at: '2021-08-08T08:07:01.522Z',
-          username: 'dicoding',
-        }],
-      }));
+      .mockImplementation(() => Promise.resolve([{
+        id: 'reply-xNBtm9HPR-492AeiimpfN',
+        content: 'sebuah balasan',
+        updated_at: '2021-08-08T08:07:01.522Z',
+        username: 'dicoding',
+      }]));
 
     /** creating use case instance */
     const getThreadUseCase = new GetThreadUseCase({
@@ -117,29 +111,25 @@ describe('GetThreadUseCase', () => {
 
     /** mocking needed function */
     mockThreadRepository.getThread = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        rowCount: 1, rows: [mockCommentedThread],
-      }));
+      .mockImplementation(() => Promise.resolve([mockCommentedThread]));
     mockCommentRepository.getComments = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        rows: [{
+      .mockImplementation(() => Promise.resolve(
+        [{
           id: commentId,
           username: 'johndoe',
           updated_at: '2021-08-08T07:22:33.555Z',
           content: 'sebuah comment',
           is_delete: true,
         }],
-      }));
+      ));
     mockReplyRepository.getReplies = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        rows: [{
-          id: 'reply-xNBtm9HPR-492AeiimpfN',
-          content: 'sebuah balasan',
-          updated_at: '2021-08-08T08:07:01.522Z',
-          username: 'dicoding',
-          is_delete: true,
-        }],
-      }));
+      .mockImplementation(() => Promise.resolve([{
+        id: 'reply-xNBtm9HPR-492AeiimpfN',
+        content: 'sebuah balasan',
+        updated_at: '2021-08-08T08:07:01.522Z',
+        username: 'dicoding',
+        is_delete: true,
+      }]));
 
     /** creating use case instance */
     const getThreadUseCase = new GetThreadUseCase({
