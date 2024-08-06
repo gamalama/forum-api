@@ -13,11 +13,12 @@ class DeleteReplyUseCase {
     await this._commentRepository.verifyComment(commentId);
 
     const verifyReplyOwner = await this._replyRepository.verifyReplyOwner(ownerId, replyId);
-    if (!verifyReplyOwner.rowCount) {
+
+    if (verifyReplyOwner.length === 0) {
       throw new NotFoundError('balasan tidak ditemukan');
     }
 
-    if (verifyReplyOwner.rows[0].owner !== ownerId) {
+    if (verifyReplyOwner[0].owner !== ownerId) {
       throw new AuthorizationError('tidak berhak menghapus balasan');
     }
 

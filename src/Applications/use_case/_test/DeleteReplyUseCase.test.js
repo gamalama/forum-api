@@ -70,7 +70,7 @@ describe('DeleteReplyUseCase', () => {
     mockCommentRepository.verifyComment = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockReplyRepository.verifyReplyOwner = jest.fn()
-      .mockImplementation(() => Promise.resolve({ rowCount: 0 }));
+      .mockImplementation(() => Promise.resolve([]));
 
     /** creating use case */
     const deleteReplyUseCase = new DeleteReplyUseCase({
@@ -101,7 +101,7 @@ describe('DeleteReplyUseCase', () => {
     mockCommentRepository.verifyComment = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockReplyRepository.verifyReplyOwner = jest.fn()
-      .mockImplementation(() => Promise.resolve({ rowCount: 1, rows: [{ owner: 'user-456' }] }));
+      .mockImplementation(() => Promise.resolve([{ owner: 'user-456' }]));
 
     /** creating use case */
     const deleteReplyUseCase = new DeleteReplyUseCase({
@@ -132,17 +132,14 @@ describe('DeleteReplyUseCase', () => {
     mockCommentRepository.verifyComment = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockReplyRepository.verifyReplyOwner = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        rowCount: 1,
-        rows: [{
-          id: 'thread-123',
-          title: 'Thread title',
-          body: 'sebuah thread',
-          owner: 'user-123',
-          createdAt: '2024-07-28T09:39:02.821Z',
-          updatedAt: '2024-07-28T09:39:02.821Z',
-        }],
-      }));
+      .mockImplementation(() => Promise.resolve([{
+        id: 'thread-123',
+        title: 'Thread title',
+        body: 'sebuah thread',
+        owner: 'user-123',
+        createdAt: '2024-07-28T09:39:02.821Z',
+        updatedAt: '2024-07-28T09:39:02.821Z',
+      }]));
     mockReplyRepository.deleteReply = jest.fn()
       .mockImplementation(() => Promise.resolve({ rowCount: 1 }));
 

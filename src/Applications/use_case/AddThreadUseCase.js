@@ -10,7 +10,7 @@ class AddThreadUseCase {
     const addThread = new AddThread(useCasePayload);
     const addedThread = await this._threadRepository.addThread(addThread, ownerId);
 
-    return new AddedThread({ ...addedThread.rows[0] });
+    return new AddedThread({ ...addedThread });
   }
 }
 

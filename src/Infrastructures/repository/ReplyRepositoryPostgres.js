@@ -32,7 +32,8 @@ class ReplyRepositoryPostgres extends ReplyRepository {
       values: [id, content, commentId, owner, createdAt, createdAt],
     };
 
-    return this._pool.query(query);
+    const { rows } = await this._pool.query(query);
+    return rows;
   }
 
   async verifyReplyOwner(ownerId, replyId) {
@@ -41,7 +42,8 @@ class ReplyRepositoryPostgres extends ReplyRepository {
       values: [replyId],
     };
 
-    return this._pool.query(query);
+    const { rows } = await this._pool.query(query);
+    return rows;
   }
 
   async deleteReply(replyId) {

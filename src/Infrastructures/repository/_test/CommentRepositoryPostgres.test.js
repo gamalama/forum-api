@@ -4,10 +4,10 @@ const ThreadsTableTestHelper = require('../../../../tests/ThreadsTableTestHelper
 const pool = require('../../database/postgres/pool');
 const AddComment = require('../../../Domains/comments/entities/AddComment');
 const CommentRepositoryPostgres = require('../CommentRepositoryPostgres');
-const AddedComment = require('../../../Domains/comments/entities/AddedComment');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
-const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
-const ReplyRepositoryPostgres = require('../ReplyRepositoryPostgres');
+const AuthorizationError = require(
+  '../../../Commons/exceptions/AuthorizationError',
+);
 
 describe('CommentRepositoryPostgres', () => {
   beforeEach(async () => {
@@ -61,7 +61,7 @@ describe('CommentRepositoryPostgres', () => {
       const verifyComment = async () => commentRepositoryPostgres.verifyComment('comment-456');
       await expect(verifyComment)
         .rejects
-        .toThrowError('komentar tidak ditemukan');
+        .toThrowError(new NotFoundError('komentar tidak ditemukan'));
     });
 
     it('should not throw error', async () => {
@@ -76,23 +76,83 @@ describe('CommentRepositoryPostgres', () => {
 
       // Assert
       await expect(() => commentRepositoryPostgres.verifyComment('comment-123'))
-        .not.toThrowError();
+        .not.toThrowError(new NotFoundError('komentar tidak ditemukan'));
     });
   });
 
   describe('verifyCommentOwner function', () => {
-    it('should return rows correctly', async () => {
-      // Arrange
-      const addComment = new AddComment({ content: 'New Comment' });
-      const fakeIdGenerator = () => '123';
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, fakeIdGenerator);
+    it('should throw error NotFoundError', async () => {
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
-      // Action
-      await commentRepositoryPostgres.addComment(addComment, 'thread-123', 'user-123');
+      // Arrange
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        content: 'New Comment from user-456',
+        thread: 'thread-123',
+        owner: 'user-123',
+        is_delete: false,
+        created_at: '2024-05-10T17:15:31.573Z',
+        updated_at: '2024-05-10T17:15:31.573Z',
+      });
 
       // Assert
-      const result = await commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-123');
-      await expect(result.rows.length).toEqual(1);
+      await expect(() => commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-001'))
+        .rejects.toThrowError(new NotFoundError('komentar tidak ditemukan'));
+    });
+
+    it('should throw error AuthorizationError', async () => {
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        content: 'New Comment from user-456',
+        thread: 'thread-123',
+        owner: 'user-123',
+        is_delete: false,
+        created_at: '2024-05-10T17:15:31.573Z',
+        updated_at: '2024-05-10T17:15:31.573Z',
+      });
+
+      // Assert
+      await expect(() => commentRepositoryPostgres.verifyCommentOwner('user-001', 'comment-123'))
+        .rejects.toThrowError(new AuthorizationError('tidak berhak menghapus komentar'));
+    });
+
+    it('should not throw error NotFoundError', async () => {
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      // Arrange
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        content: 'New Comment from user-456',
+        thread: 'thread-123',
+        owner: 'user-123',
+        is_delete: false,
+        created_at: '2024-05-10T17:15:31.573Z',
+        updated_at: '2024-05-10T17:15:31.573Z',
+      });
+
+      // Assert
+      await expect(() => commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-123'))
+        .not.toThrowError(new NotFoundError('komentar tidak ditemukan'));
+    });
+
+    it('should not throw error AuthorizationError', async () => {
+      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
+
+      await CommentsTableTestHelper.addComment({
+        id: 'comment-123',
+        content: 'New Comment from user-456',
+        thread: 'thread-123',
+        owner: 'user-123',
+        is_delete: false,
+        created_at: '2024-05-10T17:15:31.573Z',
+        updated_at: '2024-05-10T17:15:31.573Z',
+      });
+
+      // Assert
+      await expect(() => commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-123'))
+        .not.toThrowError(new AuthorizationError('tidak berhak menghapus komentar'));
     });
   });
 
@@ -109,6 +169,9 @@ describe('CommentRepositoryPostgres', () => {
       // Assert
       const comment = await CommentsTableTestHelper.findCommentById('comment-456');
       expect(comment).toHaveLength(1);
+      expect(comment[0].id).toBe('comment-456');
+      expect(comment[0].content).toBe('New Comment');
+      expect(comment[0].owner).toBe('user-456');
     });
   });
 

@@ -4,6 +4,7 @@ const AddThread = require('../../../Domains/threads/entities/AddThread');
 const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
+const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 
 describe('ThreadRepositoryPostgres', () => {
   beforeEach(async () => {
@@ -44,6 +45,12 @@ describe('ThreadRepositoryPostgres', () => {
       // Assert
       const thread = await ThreadsTableTestHelper.findThreadById('thread-123');
       expect(thread).toHaveLength(1);
+      expect(thread[0].id).toBe('thread-123');
+      expect(thread[0].title).toBe(addThread.title);
+      expect(thread[0].body).toBe(addThread.body);
+      expect(thread[0].owner).toBe('user-456');
+      expect(thread[0].created_at).toBeDefined();
+      expect(thread[0].updated_at).toBeDefined();
     });
   });
 
@@ -53,20 +60,27 @@ describe('ThreadRepositoryPostgres', () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, fakeIdGenerator);
 
       /** Add thread */
-      await ThreadsTableTestHelper.addThread({
+      const addThread = {
         id: 'thread-123',
         title: 'New Thread 123',
         body: 'New thread body 123.',
         owner: 'user-456',
         created_at: '2024-05-10T17:14:31.573Z',
         updated_at: '2024-05-10T17:14:31.573Z',
-      });
+      };
+      await ThreadsTableTestHelper.addThread(addThread);
 
       // Action
-      const commentedThread = await threadRepositoryPostgres.getThread('thread-123');
+      const thread = await threadRepositoryPostgres.getThread(addThread.id);
+      const user = await UsersTableTestHelper.findUsersById(addThread.owner);
 
       // Assert
-      await expect(commentedThread).toHaveLength(1);
+      await expect(thread).toHaveLength(1);
+      await expect(thread[0].id).toBe(addThread.id);
+      await expect(thread[0].title).toBe(addThread.title);
+      await expect(thread[0].body).toBe(addThread.body);
+      await expect(thread[0].created_at).toBe(addThread.created_at);
+      await expect(thread[0].username).toBe(user[0].username);
     });
   });
 
@@ -79,7 +93,7 @@ describe('ThreadRepositoryPostgres', () => {
       const verifyThread = async () => threadRepositoryPostgres.verifyThread('thread-001');
 
       // Assert
-      await expect(verifyThread).rejects.toThrowError('thread tidak ditemukan');
+      await expect(verifyThread).rejects.toThrowError(new NotFoundError('thread tidak ditemukan'));
     });
 
     it('should not throw error', async () => {
@@ -99,7 +113,7 @@ describe('ThreadRepositoryPostgres', () => {
       const verifyThread = async () => threadRepositoryPostgres.verifyThread('thread-123');
 
       // Assert
-      await expect(verifyThread).not.toThrowError();
+      await expect(verifyThread).not.toThrowError(new NotFoundError('thread tidak ditemukan'));
     });
   });
 });

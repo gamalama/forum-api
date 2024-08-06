@@ -24,6 +24,8 @@ describe('GetThreadUseCase', () => {
   });
 
   it('should orchestrating the get thread action correctly', async () => {
+    const threadId = 'thread-h_2FkLZhtgBKY2kh4CC02';
+    const commentId = 'comment-_pby2_tmXV6bcvcdev8xk';
     const mockCommentedThread = {
       id: 'thread-h_2FkLZhtgBKY2kh4CC02',
       title: 'sebuah thread',
@@ -91,6 +93,12 @@ describe('GetThreadUseCase', () => {
         ],
       },
     ));
+    expect(mockThreadRepository.getThread)
+      .toBeCalledWith(threadId);
+    expect(mockCommentRepository.getComments)
+      .toBeCalledWith(threadId);
+    expect(mockReplyRepository.getReplies)
+      .toBeCalledWith(commentId);
   });
 
   it('should orchestrating the get thread action correctly with comment and reply deleted', async () => {

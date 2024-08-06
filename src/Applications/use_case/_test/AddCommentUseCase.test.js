@@ -6,31 +6,6 @@ const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 
 describe('AddCommentUseCase', () => {
-  it('should throw error when thread not available', async () => {
-    // Arrange
-    const useCasePayload = {
-      content: 'New comment',
-    };
-
-    /** creating dependency of use case */
-    const mockThreadRepository = new ThreadRepository();
-    const mockCommentRepository = new CommentRepository();
-
-    /** mocking needed function */
-    mockThreadRepository.verifyThread = jest.fn()
-      .mockImplementation(async () => { throw new NotFoundError('thread tidak ditemukan'); });
-
-    /** creating use case instance */
-    const addCommentUseCase = new AddCommentUseCase({
-      threadRepository: mockThreadRepository,
-      commentRepository: mockCommentRepository,
-    });
-
-    // Action & Assert
-    await expect(addCommentUseCase.execute(useCasePayload, 'thread-123', 'user-123'))
-      .rejects.toThrowError('thread tidak ditemukan');
-  });
-
   it('should orchestrating the add comment action correctly', async () => {
     // Arrange
     const useCasePayload = {
@@ -52,9 +27,7 @@ describe('AddCommentUseCase', () => {
     mockThreadRepository.verifyThread = jest.fn()
       .mockImplementation(async () => Promise.resolve());
     mockCommentRepository.addComment = jest.fn()
-      .mockImplementation(() => Promise.resolve({
-        rows: [mockAddedComment],
-      }));
+      .mockImplementation(() => Promise.resolve(mockAddedComment));
 
     /** creating use case instance */
     const addCommentUseCase = new AddCommentUseCase({

@@ -14,7 +14,7 @@ class AddReplyUseCase {
     await this._commentRepository.verifyComment(commentId);
 
     const addedReply = await this._replyRepository.addReply(addReply, commentId, ownerId);
-    return new AddedReply({ ...addedReply.rows[0] });
+    return new AddedReply({ ...addedReply[0] });
   }
 }
 

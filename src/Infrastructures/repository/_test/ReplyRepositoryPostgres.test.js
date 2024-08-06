@@ -72,9 +72,14 @@ describe('ReplyRepositoryPostgres', () => {
       // Arrange
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool);
       const replies = await replyRepositoryPostgres.getReplies('comment-456');
+      const user = await UsersTableTestHelper.findUsersById('user-123');
 
       // Assert
       expect(replies).toHaveLength(1);
+      expect(replies[0].id).toBe('reply-789');
+      expect(replies[0].content).toBe('New reply 456');
+      expect(replies[0].updated_at).toBe('2024-05-10T17:15:31.573Z');
+      expect(replies[0].username).toBe(user[0].username);
     });
   });
 
@@ -87,11 +92,17 @@ describe('ReplyRepositoryPostgres', () => {
 
       // Action
       await replyRepositoryPostgres.addReply(addReply, 'comment-456', 'user-123');
-
-      // Assert
       const reply = await RepliesTableTestHelper.findReplyById('reply-456');
 
+      // Assert
       expect(reply).toHaveLength(1);
+      expect(reply[0].id).toBe('reply-456');
+      expect(reply[0].content).toBe('New Reply');
+      expect(reply[0].comment).toBe('comment-456');
+      expect(reply[0].owner).toBe('user-123');
+      expect(reply[0].is_delete).toBe(false);
+      expect(reply[0].created_at).toBeDefined();
+      expect(reply[0].updated_at).toBeDefined();
     });
   });
 
@@ -111,7 +122,7 @@ describe('ReplyRepositoryPostgres', () => {
 
       // Action
       const result = await replyRepositoryPostgres.verifyReplyOwner('user-456', 'reply-123');
-      await expect(result.rowCount).toEqual(1);
+      await expect(result.length).toEqual(1);
     });
   });
 

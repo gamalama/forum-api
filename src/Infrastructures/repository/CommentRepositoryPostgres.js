@@ -1,5 +1,8 @@
 const CommentRepository = require('../../Domains/comments/CommentRepository');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
+const AuthorizationError = require(
+  '../../Commons/exceptions/AuthorizationError',
+);
 
 class CommentRepositoryPostgres extends CommentRepository {
   constructor(pool, idGenerator) {
@@ -38,7 +41,15 @@ class CommentRepositoryPostgres extends CommentRepository {
       text: 'SELECT * FROM comments WHERE id = $1',
       values: [commentId],
     };
-    return this._pool.query(query);
+
+    const result = await this._pool.query(query);
+    if (!result.rowCount) {
+      throw new NotFoundError('komentar tidak ditemukan');
+    }
+
+    if (result.rows[0].owner !== ownerId) {
+      throw new AuthorizationError('tidak berhak menghapus komentar');
+    }
   }
 
   async addComment(addComment, threadId, owner) {
@@ -52,7 +63,8 @@ class CommentRepositoryPostgres extends CommentRepository {
       values: [id, content, threadId, owner, createdAt, createdAt],
     };
 
-    return this._pool.query(query);
+    const { rows } = await this._pool.query(query);
+    return rows[0];
   }
 
   async deleteComment(commentId) {
