@@ -10,7 +10,7 @@ class DeleteReplyUseCase {
 
   async execute(ownerId, threadId, commentId, replyId) {
     await this._threadRepository.verifyThread(threadId);
-    await this._commentRepository.verifyComment(commentId);
+    await this._commentRepository.verifyCommentIsExist(commentId);
 
     const verifyReplyOwner = await this._replyRepository.verifyReplyOwner(ownerId, replyId);
 

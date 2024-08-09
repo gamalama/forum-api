@@ -1,5 +1,5 @@
 class CommentRepository {
-  async verifyComment() {
+  async verifyCommentIsExist() {
     throw new Error('COMMENT_REPOSITORY.METHOD_NOT_IMPLEMENTED');
   }
 

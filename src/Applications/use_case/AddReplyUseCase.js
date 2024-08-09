@@ -11,7 +11,7 @@ class AddReplyUseCase {
   async execute(useCasePayload, threadId, commentId, ownerId) {
     const addReply = new AddReply(useCasePayload);
     await this._threadRepository.verifyThread(threadId);
-    await this._commentRepository.verifyComment(commentId);
+    await this._commentRepository.verifyCommentIsExist(commentId);
 
     const addedReply = await this._replyRepository.addReply(addReply, commentId, ownerId);
     return new AddedReply({ ...addedReply[0] });

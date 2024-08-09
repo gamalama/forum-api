@@ -44,7 +44,7 @@ describe('AddReplyUseCase', () => {
     /** mocking needed function */
     mockThreadRepository.verifyThread = jest.fn()
       .mockImplementation(async () => Promise.resolve());
-    mockCommentRepository.verifyComment = jest.fn()
+    mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(async () => { throw new NotFoundError('komentar tidak ditemukan'); });
 
     /** creating use case instance */
@@ -80,7 +80,7 @@ describe('AddReplyUseCase', () => {
     /** mocking needed function */
     mockThreadRepository.verifyThread = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockCommentRepository.verifyComment = jest.fn()
+    mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockReplyRepository.addReply = jest.fn()
       .mockImplementation(() => Promise.resolve([mockAddedReply]));
@@ -108,7 +108,7 @@ describe('AddReplyUseCase', () => {
     }));
     expect(mockThreadRepository.verifyThread)
       .toBeCalledWith(threadId);
-    expect(mockCommentRepository.verifyComment(commentId));
+    expect(mockCommentRepository.verifyCommentIsExist(commentId));
     expect(mockReplyRepository.addReply).toBeCalledWith(new AddReply({
       content: useCasePayload.content,
     }), 'comment-123', 'user-123');

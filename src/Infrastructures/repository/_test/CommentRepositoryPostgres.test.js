@@ -46,7 +46,7 @@ describe('CommentRepositoryPostgres', () => {
     await pool.end();
   });
 
-  describe('verifyComment function', () => {
+  describe('verifyCommentIsExist function', () => {
     it('should throw error when comment not found', async () => {
       // Arrange
       const addComment = new AddComment({ content: 'New Comment' });
@@ -58,8 +58,8 @@ describe('CommentRepositoryPostgres', () => {
       // const result = await commentRepositoryPostgres.verifyComment('comment-123');
 
       // Assert
-      const verifyComment = async () => commentRepositoryPostgres.verifyComment('comment-456');
-      await expect(verifyComment)
+      const verifyCommentIsExist = async () => commentRepositoryPostgres.verifyCommentIsExist('comment-456');
+      await expect(verifyCommentIsExist)
         .rejects
         .toThrowError(new NotFoundError('komentar tidak ditemukan'));
     });
@@ -72,10 +72,9 @@ describe('CommentRepositoryPostgres', () => {
 
       // Action
       await commentRepositoryPostgres.addComment(addComment, 'thread-123', 'user-123');
-      // const result = await commentRepositoryPostgres.verifyComment('comment-123');
 
       // Assert
-      await expect(() => commentRepositoryPostgres.verifyComment('comment-123'))
+      await expect(() => commentRepositoryPostgres.verifyCommentIsExist('comment-123'))
         .not.toThrowError(new NotFoundError('komentar tidak ditemukan'));
     });
   });

@@ -38,7 +38,7 @@ describe('DeleteReplyUseCase', () => {
     /** mocking needed function */
     mockThreadRepository.verifyThread = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockCommentRepository.verifyComment = jest.fn()
+    mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => { throw new NotFoundError('komentar tidak ditemukan'); });
 
     /** creating use case */
@@ -67,7 +67,7 @@ describe('DeleteReplyUseCase', () => {
     /** mocking needed function */
     mockThreadRepository.verifyThread = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockCommentRepository.verifyComment = jest.fn()
+    mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockReplyRepository.verifyReplyOwner = jest.fn()
       .mockImplementation(() => Promise.resolve([]));
@@ -98,7 +98,7 @@ describe('DeleteReplyUseCase', () => {
     /** mocking needed function */
     mockThreadRepository.verifyThread = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockCommentRepository.verifyComment = jest.fn()
+    mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockReplyRepository.verifyReplyOwner = jest.fn()
       .mockImplementation(() => Promise.resolve([{ owner: 'user-456' }]));
@@ -129,7 +129,7 @@ describe('DeleteReplyUseCase', () => {
     /** mocking needed function */
     mockThreadRepository.verifyThread = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockCommentRepository.verifyComment = jest.fn()
+    mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockReplyRepository.verifyReplyOwner = jest.fn()
       .mockImplementation(() => Promise.resolve([{
@@ -161,7 +161,7 @@ describe('DeleteReplyUseCase', () => {
     // Assert
     expect(mockThreadRepository.verifyThread)
       .toHaveBeenCalledWith('thread-123');
-    expect(mockCommentRepository.verifyComment)
+    expect(mockCommentRepository.verifyCommentIsExist)
       .toHaveBeenCalledWith('comment-123');
     expect(mockReplyRepository.verifyReplyOwner)
       .toHaveBeenCalledWith('user-123', 'reply-123');
