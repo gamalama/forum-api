@@ -1,6 +1,3 @@
-const dotenv = require('dotenv');
-const path = require('path');
-
 const config = {
   database: {
     host: process.env.PGHOST,

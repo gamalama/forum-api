@@ -1,5 +1,4 @@
 const AddReply = require('../AddReply');
-const AddComment = require('../../../comments/entities/AddComment');
 
 describe('and AddReply entities', () => {
   it('should throw error when payload did not contain needed property', () => {

@@ -1,5 +1,4 @@
 const CommentedThread = require('../CommentedThread');
-const AddedThread = require('../AddedThread');
 
 describe('an CommentedThread entities', () => {
   it('should throw error when payload did not contain needed property', () => {

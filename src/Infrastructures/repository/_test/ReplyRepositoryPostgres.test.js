@@ -4,10 +4,7 @@ const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelp
 const RepliesTableTestHelper = require('../../../../tests/RepliesTableTestHelper');
 const pool = require('../../database/postgres/pool');
 const ReplyRepositoryPostgres = require('../ReplyRepositoryPostgres');
-const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
-const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 const AddReply = require('../../../Domains/replies/entities/AddReply');
-const AddedReply = require('../../../Domains/replies/entities/AddedReply');
 
 describe('ReplyRepositoryPostgres', () => {
   beforeEach(async () => {

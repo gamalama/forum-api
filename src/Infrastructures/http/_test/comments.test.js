@@ -1,4 +1,3 @@
-const { response } = require('@hapi/hapi/lib/validation');
 const pool = require('../../database/postgres/pool');
 const container = require('../../container');
 const createServer = require('../createServer');
