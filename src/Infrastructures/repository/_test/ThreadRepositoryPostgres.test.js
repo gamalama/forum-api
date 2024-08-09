@@ -84,16 +84,16 @@ describe('ThreadRepositoryPostgres', () => {
     });
   });
 
-  describe('verifyThread function', () => {
+  describe('verifyThreadIsExist function', () => {
     it('should throw error when thread not found', async () => {
       // const fakeIdGenerator = () => '123';
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
 
       // Action
-      const verifyThread = async () => threadRepositoryPostgres.verifyThread('thread-001');
+      const verifyThreadIsExist = async () => threadRepositoryPostgres.verifyThreadIsExist('thread-001');
 
       // Assert
-      await expect(verifyThread).rejects.toThrowError(new NotFoundError('thread tidak ditemukan'));
+      await expect(verifyThreadIsExist).rejects.toThrowError(new NotFoundError('thread tidak ditemukan'));
     });
 
     it('should not throw error', async () => {
@@ -110,10 +110,10 @@ describe('ThreadRepositoryPostgres', () => {
       });
 
       // Action
-      const verifyThread = async () => threadRepositoryPostgres.verifyThread('thread-123');
+      const verifyThreadIsExist = async () => threadRepositoryPostgres.verifyThreadIsExist('thread-123');
 
       // Assert
-      await expect(verifyThread).not.toThrowError(new NotFoundError('thread tidak ditemukan'));
+      await expect(verifyThreadIsExist).not.toThrowError(new NotFoundError('thread tidak ditemukan'));
     });
   });
 });

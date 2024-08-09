@@ -11,7 +11,7 @@ describe('DeleteReplyUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
 
     /** mocking needed function */
-    mockThreadRepository.verifyThread = jest.fn()
+    mockThreadRepository.verifyThreadIsExist = jest.fn()
       .mockImplementation(() => { throw new NotFoundError('thread tidak ditemukan'); });
 
     /** creating use case */
@@ -36,7 +36,7 @@ describe('DeleteReplyUseCase', () => {
     // const mockReplyRepository = new ReplyRepository();
 
     /** mocking needed function */
-    mockThreadRepository.verifyThread = jest.fn()
+    mockThreadRepository.verifyThreadIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => { throw new NotFoundError('komentar tidak ditemukan'); });
@@ -65,7 +65,7 @@ describe('DeleteReplyUseCase', () => {
     const mockReplyRepository = new ReplyRepository();
 
     /** mocking needed function */
-    mockThreadRepository.verifyThread = jest.fn()
+    mockThreadRepository.verifyThreadIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
@@ -96,7 +96,7 @@ describe('DeleteReplyUseCase', () => {
     const mockReplyRepository = new ReplyRepository();
 
     /** mocking needed function */
-    mockThreadRepository.verifyThread = jest.fn()
+    mockThreadRepository.verifyThreadIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
@@ -127,7 +127,7 @@ describe('DeleteReplyUseCase', () => {
     const mockReplyRepository = new ReplyRepository();
 
     /** mocking needed function */
-    mockThreadRepository.verifyThread = jest.fn()
+    mockThreadRepository.verifyThreadIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
@@ -159,7 +159,7 @@ describe('DeleteReplyUseCase', () => {
     );
 
     // Assert
-    expect(mockThreadRepository.verifyThread)
+    expect(mockThreadRepository.verifyThreadIsExist)
       .toHaveBeenCalledWith('thread-123');
     expect(mockCommentRepository.verifyCommentIsExist)
       .toHaveBeenCalledWith('comment-123');
