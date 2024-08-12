@@ -93,10 +93,12 @@ describe('ThreadRepositoryPostgres', () => {
       const verifyThreadIsExist = async () => threadRepositoryPostgres.verifyThreadIsExist('thread-001');
 
       // Assert
-      await expect(verifyThreadIsExist).rejects.toThrowError(new NotFoundError('thread tidak ditemukan'));
+      await expect(verifyThreadIsExist)
+        .rejects
+        .toThrowError(new NotFoundError('thread tidak ditemukan'));
     });
 
-    it('should not throw error', async () => {
+    it('should not throw error when thread found', async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool);
 
       /** Add thread */
@@ -109,11 +111,11 @@ describe('ThreadRepositoryPostgres', () => {
         updated_at: '2024-05-10T17:14:31.573Z',
       });
 
-      // Action
-      const verifyThreadIsExist = async () => threadRepositoryPostgres.verifyThreadIsExist('thread-123');
-
-      // Assert
-      await expect(verifyThreadIsExist).not.toThrowError(new NotFoundError('thread tidak ditemukan'));
+      // Action & Assert
+      await expect(threadRepositoryPostgres.verifyThreadIsExist('thread-123'))
+        .resolves
+        .not
+        .toThrowError(new NotFoundError('thread tidak ditemukan'));
     });
   });
 });

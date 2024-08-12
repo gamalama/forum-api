@@ -3,6 +3,9 @@ const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
 const DeleteReplyUseCase = require('../DeleteReplyUseCase');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
+const AuthorizationError = require(
+  '../../../Commons/exceptions/AuthorizationError',
+);
 
 describe('DeleteReplyUseCase', () => {
   it('should throw error when thread not found', async () => {
@@ -69,14 +72,14 @@ describe('DeleteReplyUseCase', () => {
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
-    mockReplyRepository.verifyReplyOwner = jest.fn()
-      .mockImplementation(() => Promise.resolve([]));
+    mockReplyRepository.verifyReplyIsExist = jest.fn()
+      .mockImplementation(() => { throw new NotFoundError('balasan tidak ditemukan'); });
 
     /** creating use case */
     const deleteReplyUseCase = new DeleteReplyUseCase({
       threadRepository: mockThreadRepository,
-      replyRepository: mockReplyRepository,
       commentRepository: mockCommentRepository,
+      replyRepository: mockReplyRepository,
     });
 
     // Action & Assert
@@ -100,8 +103,10 @@ describe('DeleteReplyUseCase', () => {
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
+    mockReplyRepository.verifyReplyIsExist = jest.fn()
+      .mockImplementation(() => Promise.resolve());
     mockReplyRepository.verifyReplyOwner = jest.fn()
-      .mockImplementation(() => Promise.resolve([{ owner: 'user-456' }]));
+      .mockImplementation(() => { throw new AuthorizationError('tidak berhak menghapus balasan'); });
 
     /** creating use case */
     const deleteReplyUseCase = new DeleteReplyUseCase({
@@ -131,17 +136,12 @@ describe('DeleteReplyUseCase', () => {
       .mockImplementation(() => Promise.resolve());
     mockCommentRepository.verifyCommentIsExist = jest.fn()
       .mockImplementation(() => Promise.resolve());
+    mockReplyRepository.verifyReplyIsExist = jest.fn()
+      .mockImplementation(() => Promise.resolve());
     mockReplyRepository.verifyReplyOwner = jest.fn()
-      .mockImplementation(() => Promise.resolve([{
-        id: 'thread-123',
-        title: 'Thread title',
-        body: 'sebuah thread',
-        owner: 'user-123',
-        createdAt: '2024-07-28T09:39:02.821Z',
-        updatedAt: '2024-07-28T09:39:02.821Z',
-      }]));
+      .mockImplementation(() => Promise.resolve());
     mockReplyRepository.deleteReply = jest.fn()
-      .mockImplementation(() => Promise.resolve({ rowCount: 1 }));
+      .mockImplementation(() => Promise.resolve());
 
     /** creating use case */
     const deleteReplyUseCase = new DeleteReplyUseCase({

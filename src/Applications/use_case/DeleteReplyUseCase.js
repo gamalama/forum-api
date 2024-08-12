@@ -1,6 +1,3 @@
-const NotFoundError = require('../../Commons/exceptions/NotFoundError');
-const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
-
 class DeleteReplyUseCase {
   constructor({ threadRepository, commentRepository, replyRepository }) {
     this._threadRepository = threadRepository;
@@ -10,19 +7,14 @@ class DeleteReplyUseCase {
 
   async execute(ownerId, threadId, commentId, replyId) {
     await this._threadRepository.verifyThreadIsExist(threadId);
+
     await this._commentRepository.verifyCommentIsExist(commentId);
 
-    const verifyReplyOwner = await this._replyRepository.verifyReplyOwner(ownerId, replyId);
+    await this._replyRepository.verifyReplyIsExist(replyId);
 
-    if (verifyReplyOwner.length === 0) {
-      throw new NotFoundError('balasan tidak ditemukan');
-    }
+    await this._replyRepository.verifyReplyOwner(ownerId, replyId);
 
-    if (verifyReplyOwner[0].owner !== ownerId) {
-      throw new AuthorizationError('tidak berhak menghapus balasan');
-    }
-
-    await this._replyRepository.deleteReply(replyId);
+    this._replyRepository.deleteReply(replyId);
   }
 }
 

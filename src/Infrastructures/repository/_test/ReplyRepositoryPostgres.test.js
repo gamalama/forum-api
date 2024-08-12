@@ -5,6 +5,10 @@ const RepliesTableTestHelper = require('../../../../tests/RepliesTableTestHelper
 const pool = require('../../database/postgres/pool');
 const ReplyRepositoryPostgres = require('../ReplyRepositoryPostgres');
 const AddReply = require('../../../Domains/replies/entities/AddReply');
+const AuthorizationError = require(
+  '../../../Commons/exceptions/AuthorizationError',
+);
+const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 
 describe('ReplyRepositoryPostgres', () => {
   beforeEach(async () => {
@@ -103,23 +107,87 @@ describe('ReplyRepositoryPostgres', () => {
     });
   });
 
-  describe('verifyReplyOwner function', () => {
-    it('should return rows correctly', async () => {
+  describe('verifyReplyIsExist function', () => {
+    it('should throw error when reply not found', async () => {
       // Arrange
-      const addReply = new AddReply({ content: 'New Reply' });
-      const fakeIdGenerator = () => '123';
-      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, fakeIdGenerator);
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
 
       // Action
-      await replyRepositoryPostgres.addReply(
-        addReply,
-        'comment-456',
-        'user-456',
-      );
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-008',
+        content: 'New reply 456',
+        comment: 'comment-456',
+        owner: 'user-123',
+        is_delete: false,
+        created_at: '2024-05-10T17:15:31.573Z',
+        updated_at: '2024-05-10T17:15:31.573Z',
+      });
 
       // Action
-      const result = await replyRepositoryPostgres.verifyReplyOwner('user-456', 'reply-123');
-      await expect(result.length).toEqual(1);
+      await expect(replyRepositoryPostgres.verifyReplyIsExist('reply-007'))
+        .rejects.toThrowError(new NotFoundError('balasan tidak ditemukan'));
+    });
+
+    it('should not throw error when reply found', async () => {
+      // Arrange
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-008',
+        content: 'New reply 456',
+        comment: 'comment-456',
+        owner: 'user-123',
+        is_delete: false,
+        created_at: '2024-05-10T17:15:31.573Z',
+        updated_at: '2024-05-10T17:15:31.573Z',
+      });
+
+      // Action
+      await expect(replyRepositoryPostgres.verifyReplyIsExist('reply-008'))
+        .resolves.not.toThrowError(new NotFoundError('balasan tidak ditemukan'));
+    });
+  });
+
+  describe('verifyReplyOwner function', () => {
+    it('should throw error when user have no rights', async () => {
+      // Arrange
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-008',
+        content: 'New reply 456',
+        comment: 'comment-456',
+        owner: 'user-123',
+        is_delete: false,
+        created_at: '2024-05-10T17:15:31.573Z',
+        updated_at: '2024-05-10T17:15:31.573Z',
+      });
+
+      // Action
+      await expect(replyRepositoryPostgres.verifyReplyOwner('user-456', 'reply-008'))
+        .rejects.toThrowError(new AuthorizationError('tidak berhak menghapus balasan'));
+    });
+
+    it('should not throw error when user have rights', async () => {
+      // Arrange
+      const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool, {});
+
+      // Action
+      await RepliesTableTestHelper.addReply({
+        id: 'reply-008',
+        content: 'New reply 456',
+        comment: 'comment-456',
+        owner: 'user-123',
+        is_delete: false,
+        created_at: '2024-05-10T17:15:31.573Z',
+        updated_at: '2024-05-10T17:15:31.573Z',
+      });
+
+      // Action
+      await expect(replyRepositoryPostgres.verifyReplyOwner('user-123', 'reply-008'))
+        .resolves.not.toThrowError(new AuthorizationError('tidak berhak menghapus balasan'));
     });
   });
 

@@ -64,7 +64,7 @@ describe('CommentRepositoryPostgres', () => {
         .toThrowError(new NotFoundError('komentar tidak ditemukan'));
     });
 
-    it('should not throw error', async () => {
+    it('should not throw error when comment found', async () => {
       // Arrange
       const addComment = new AddComment({ content: 'New Comment' });
       const fakeIdGenerator = () => '123';
@@ -74,31 +74,14 @@ describe('CommentRepositoryPostgres', () => {
       await commentRepositoryPostgres.addComment(addComment, 'thread-123', 'user-123');
 
       // Assert
-      await expect(() => commentRepositoryPostgres.verifyCommentIsExist('comment-123'))
-        .not.toThrowError(new NotFoundError('komentar tidak ditemukan'));
+      await expect(commentRepositoryPostgres.verifyCommentIsExist('comment-123'))
+        .resolves
+        .not
+        .toThrowError(new NotFoundError('komentar tidak ditemukan'));
     });
   });
 
   describe('verifyCommentOwner function', () => {
-    it('should throw error NotFoundError', async () => {
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-      // Arrange
-      await CommentsTableTestHelper.addComment({
-        id: 'comment-123',
-        content: 'New Comment from user-456',
-        thread: 'thread-123',
-        owner: 'user-123',
-        is_delete: false,
-        created_at: '2024-05-10T17:15:31.573Z',
-        updated_at: '2024-05-10T17:15:31.573Z',
-      });
-
-      // Assert
-      await expect(() => commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-001'))
-        .rejects.toThrowError(new NotFoundError('komentar tidak ditemukan'));
-    });
-
     it('should throw error AuthorizationError', async () => {
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
 
@@ -113,27 +96,9 @@ describe('CommentRepositoryPostgres', () => {
       });
 
       // Assert
-      await expect(() => commentRepositoryPostgres.verifyCommentOwner('user-001', 'comment-123'))
-        .rejects.toThrowError(new AuthorizationError('tidak berhak menghapus komentar'));
-    });
-
-    it('should not throw error NotFoundError', async () => {
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-      // Arrange
-      await CommentsTableTestHelper.addComment({
-        id: 'comment-123',
-        content: 'New Comment from user-456',
-        thread: 'thread-123',
-        owner: 'user-123',
-        is_delete: false,
-        created_at: '2024-05-10T17:15:31.573Z',
-        updated_at: '2024-05-10T17:15:31.573Z',
-      });
-
-      // Assert
-      await expect(() => commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-123'))
-        .not.toThrowError(new NotFoundError('komentar tidak ditemukan'));
+      await expect(commentRepositoryPostgres.verifyCommentOwner('user-001', 'comment-123'))
+        .rejects
+        .toThrowError(new AuthorizationError('tidak berhak menghapus komentar'));
     });
 
     it('should not throw error AuthorizationError', async () => {
@@ -150,8 +115,10 @@ describe('CommentRepositoryPostgres', () => {
       });
 
       // Assert
-      await expect(() => commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-123'))
-        .not.toThrowError(new AuthorizationError('tidak berhak menghapus komentar'));
+      await expect(commentRepositoryPostgres.verifyCommentOwner('user-123', 'comment-123'))
+        .resolves
+        .not
+        .toThrowError(new AuthorizationError('tidak berhak menghapus komentar'));
     });
   });
 
