@@ -1,10 +1,9 @@
 const CommentedThread = require('../../../Domains/threads/entities/CommentedThread');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const GetThreadUseCase = require('../GetThreadUseCase');
-const CommentRepository = require(
-  '../../../Domains/comments/CommentRepository',
-);
+const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
+const LikeRepository = require('../../../Domains/likes/LikeRepository');
 
 describe('GetThreadUseCase', () => {
   it('should throw error when thread not found', async () => {
@@ -38,6 +37,7 @@ describe('GetThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     /** mocking needed function */
     mockThreadRepository.getThread = jest.fn()
@@ -58,12 +58,15 @@ describe('GetThreadUseCase', () => {
         updated_at: '2021-08-08T08:07:01.522Z',
         username: 'dicoding',
       }]));
+    mockLikeRepository.countLike = jest.fn()
+      .mockImplementation(() => Promise.resolve('1'));
 
     /** creating use case instance */
     const getThreadUseCase = new GetThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -89,6 +92,7 @@ describe('GetThreadUseCase', () => {
               date: '2021-08-08T08:07:01.522Z',
               username: 'dicoding',
             }],
+            likeCount: 1,
           },
         ],
       },
@@ -97,6 +101,8 @@ describe('GetThreadUseCase', () => {
       .toBeCalledWith(threadId);
     expect(mockCommentRepository.getComments)
       .toBeCalledWith(threadId);
+    expect(mockLikeRepository.countLike)
+      .toBeCalledWith(commentId);
     expect(mockReplyRepository.getReplies)
       .toBeCalledWith(commentId);
   });
@@ -116,6 +122,7 @@ describe('GetThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     /** mocking needed function */
     mockThreadRepository.getThread = jest.fn()
@@ -138,12 +145,15 @@ describe('GetThreadUseCase', () => {
         username: 'dicoding',
         is_delete: true,
       }]));
+    mockLikeRepository.countLike = jest.fn()
+      .mockImplementation(() => Promise.resolve('1'));
 
     /** creating use case instance */
     const getThreadUseCase = new GetThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -169,6 +179,7 @@ describe('GetThreadUseCase', () => {
               date: '2021-08-08T08:07:01.522Z',
               username: 'dicoding',
             }],
+            likeCount: 1,
           },
         ],
       },
@@ -177,6 +188,8 @@ describe('GetThreadUseCase', () => {
       .toBeCalledWith(threadId);
     expect(mockCommentRepository.getComments)
       .toBeCalledWith(threadId);
+    expect(mockLikeRepository.countLike)
+      .toBeCalledWith(commentId);
     expect(mockReplyRepository.getReplies)
       .toBeCalledWith(commentId);
   });
