@@ -2,10 +2,13 @@ const NotFoundError = require('../../Commons/exceptions/NotFoundError');
 const CommentedThread = require('../../Domains/threads/entities/CommentedThread');
 
 class GetThreadUseCase {
-  constructor({ threadRepository, commentRepository, replyRepository }) {
+  constructor({
+    threadRepository, commentRepository, replyRepository, likeRepository,
+  }) {
     this._threadRepository = threadRepository;
     this._commentRepository = commentRepository;
     this._replyRepository = replyRepository;
+    this._likeRepository = likeRepository;
   }
 
   async execute(threadId) {
@@ -27,12 +30,18 @@ class GetThreadUseCase {
       }));
     };
 
+    const commentLikes = async (commentId) => {
+      const count = await this._likeRepository.countLike(commentId);
+      return Number(count);
+    };
+
     const comments = await Promise.all(getComments.map(async (comment) => ({
       id: comment.id,
       username: comment.username,
       date: comment.updated_at,
       content: comment.is_delete ? '**komentar telah dihapus**' : comment.content,
       replies: await getReplies(comment.id),
+      likeCount: await commentLikes(comment.id),
     })));
 
     return new CommentedThread({

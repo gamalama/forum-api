@@ -32,6 +32,7 @@ describe('DeleteCommentUseCase', () => {
     // Action
     await deleteCommentUseCase.execute(ownerId, threadId, commentId);
 
+    // Assert
     expect(mockThreadRepository.verifyThreadIsExist)
       .toBeCalledWith(threadId);
     expect(mockCommentRepository.verifyCommentOwner)

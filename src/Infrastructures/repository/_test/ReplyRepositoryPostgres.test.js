@@ -5,9 +5,7 @@ const RepliesTableTestHelper = require('../../../../tests/RepliesTableTestHelper
 const pool = require('../../database/postgres/pool');
 const ReplyRepositoryPostgres = require('../ReplyRepositoryPostgres');
 const AddReply = require('../../../Domains/replies/entities/AddReply');
-const AuthorizationError = require(
-  '../../../Commons/exceptions/AuthorizationError',
-);
+const AuthorizationError = require('../../../Commons/exceptions/AuthorizationError');
 const NotFoundError = require('../../../Commons/exceptions/NotFoundError');
 
 describe('ReplyRepositoryPostgres', () => {
@@ -72,6 +70,8 @@ describe('ReplyRepositoryPostgres', () => {
     it('should return reply result rows correctly', async () => {
       // Arrange
       const replyRepositoryPostgres = new ReplyRepositoryPostgres(pool);
+
+      // Action
       const replies = await replyRepositoryPostgres.getReplies('comment-456');
       const user = await UsersTableTestHelper.findUsersById('user-123');
 
