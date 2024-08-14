@@ -1,5 +1,8 @@
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
+const Vision = require('@hapi/vision');
+const HapiSwagger = require('hapi-swagger');
 const ClientError = require('../../Commons/exceptions/ClientError');
 const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');
 const users = require('../../Interfaces/http/api/users');
@@ -9,9 +12,6 @@ const comments = require('../../Interfaces/http/api/comments');
 const replies = require('../../Interfaces/http/api/replies');
 const likes = require('../../Interfaces/http/api/likes');
 const config = require('../../Commons/config');
-const Inert = require('@hapi/inert');
-const Vision = require('@hapi/vision');
-const HapiSwagger = require('hapi-swagger');
 
 const createServer = async (container) => {
   const server = Hapi.server({
@@ -91,7 +91,7 @@ const createServer = async (container) => {
   server.ext('onPreResponse', (request, h) => {
     // mendapatkan konteks response dari request
     const { response } = request;
-
+    console.log(response);
     if (response instanceof Error) {
       // bila response tersebut error, tangani sesuai kebutuhan
       const translatedError = DomainErrorTranslator.translate(response);
