@@ -9,12 +9,35 @@ const comments = require('../../Interfaces/http/api/comments');
 const replies = require('../../Interfaces/http/api/replies');
 const likes = require('../../Interfaces/http/api/likes');
 const config = require('../../Commons/config');
+const Inert = require('@hapi/inert');
+const Vision = require('@hapi/vision');
+const HapiSwagger = require('hapi-swagger');
 
 const createServer = async (container) => {
   const server = Hapi.server({
     host: process.env.HOST,
     port: process.env.PORT,
   });
+
+  const swaggerOptions = {
+    info: {
+      title: 'Forum API Documentation',
+      version: '1.0.0',
+    },
+  };
+
+  await server.register([
+    {
+      plugin: Inert,
+    },
+    {
+      plugin: Vision,
+    },
+    {
+      plugin: HapiSwagger,
+      options: swaggerOptions,
+    },
+  ]);
 
   await server.register([
     {
