@@ -1,5 +1,8 @@
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
+const Vision = require('@hapi/vision');
+const HapiSwagger = require('hapi-swagger');
 const ClientError = require('../../Commons/exceptions/ClientError');
 const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');
 const users = require('../../Interfaces/http/api/users');
@@ -15,6 +18,26 @@ const createServer = async (container) => {
     host: process.env.HOST,
     port: process.env.PORT,
   });
+
+  const swaggerOptions = {
+    info: {
+      title: 'Forum API Documentation',
+      version: '1.0.0',
+    },
+  };
+
+  await server.register([
+    {
+      plugin: Inert,
+    },
+    {
+      plugin: Vision,
+    },
+    {
+      plugin: HapiSwagger,
+      options: swaggerOptions,
+    },
+  ]);
 
   await server.register([
     {
@@ -68,7 +91,7 @@ const createServer = async (container) => {
   server.ext('onPreResponse', (request, h) => {
     // mendapatkan konteks response dari request
     const { response } = request;
-
+    console.log(response);
     if (response instanceof Error) {
       // bila response tersebut error, tangani sesuai kebutuhan
       const translatedError = DomainErrorTranslator.translate(response);
